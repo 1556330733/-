@@ -1,0 +1,7 @@
+#!/bin/bash
+ifconfig eth0 | awk '/RX p/{print "接收的流量"$5"字节"}'
+ifconfig eth0 | awk '/TX p/{print "传出的流量"$5"字节"}'
+df -h | awk '/vda1/{print "主机根分区剩余空间是"$4}'
+
+
+~                                                            
