@@ -1,0 +1,7 @@
+#!/bin/bash
+user=`awk -F: '/bash$/{print $1}' /etc/passwd`   //把 user定义为以 : 为分隔符查找以bash结尾的第一列的数
+for i in $user     
+do
+ grep "$i" /etc/shadow | awk -F: '{print $1"-->"$2}'   ///查询$user并且管道给awk以:为分隔符输出第1列"--->"第二列
+done
+~     
