@@ -1,0 +1,10 @@
+#!/bin/bash
+u=`sed -n '/bash$/s/:.*//p' /etc/passwd`  #查找以bash结尾的用户把他":"后面的所有字符全删
+for i in $u                              #循环
+do                                        #$i是$u查出的用户
+ x=`grep $!: /etc/shadow`                #查找$1的用户密码
+ a1=${x#*:}                              #掐去以":"以前的字符
+ a2=${a1%%:*}                       #去掉"a1" 中":1799"后面的所有字符
+ echo "$i --> $a2"                      #输出 "$i" 和"$a2"
+done
+
