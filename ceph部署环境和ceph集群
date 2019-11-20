@@ -1,0 +1,97 @@
+#i/bin/bash
+#物理机为所有节点配置yum源服务器。ceph10.iso在/linux-soft/02目录。
+# mkdir  /var/ftp/ceph
+# mount ceph10.iso /var/ftp/ceph/
+ssh-keygen   -f /root/.ssh/id_rsa    -N ''
+
+for i in 10  11  12  13
+do
+ssh-copy-id  192.168.4.$i
+done
+
+
+echo    "192.168.4.10     client
+         192.168.4.11     node1
+         192.168.4.12     node2
+         192.168.4.13     node3" >> /etc/hosts
+
+for i in client node1  node2  node3
+do
+scp  /etc/hosts   $i:/etc/
+done
+
+echo "[mon]
+name=mon
+baseurl=ftp://192.168.4.254/ceph/MON
+gpgcheck=0
+[osd]
+name=osd
+baseurl=ftp://192.168.4.254/ceph/OSD
+gpgcheck=0
+[tools]
+name=tools
+baseurl=ftp://192.168.4.254/ceph/Tools
+gpgcheck=0 " >  /etc/yum.repos.d/ceph.repo
+
+
+for i in  client  node1  node2  node3
+do
+scp  /etc/yum.repos.d/ceph.repo   $i:/etc/yum.repos.d/
+done
+
+sed -i "s/gateway/192.168.4.254/" /etc/chrony.conf
+
+
+for i in client  node1  node2  node3
+do
+scp /etc/chrony.conf $i:/etc/
+ssh  $i  "systemctl restart chronyd"
+done
+
+yum -y install ceph-deploy
+mkdir ceph-cluster
+cd ceph-cluster/
+ceph-deploy new node1 node2 node3
+
+for i in node1 node2 node3
+do
+ssh  $i "yum -y install ceph-mon ceph-osd ceph-mds ceph-radosgw"
+done
+ceph-deploy mon create-initial
+
+for i in node1 node2 node3
+do
+     ssh $i "parted /dev/vdb mklabel gpt"
+     ssh $i "parted /dev/vdb mkpart primary 1 50%"
+     ssh $i "parted /dev/vdb mkpart primary 50% 100%"
+done
+
+for i in node1 node2 node3
+do
+ssh $i "chown  ceph.ceph  /dev/vdb1"
+ssh $i "chown  ceph.ceph  /dev/vdb2"
+done
+
+echo 'ENV{DEVNAME}=="/dev/vdb1",OWNER="ceph",GROUP="ceph"
+ENV{DEVNAME}=="/dev/vdb2",OWNER="ceph",GROUP="ceph" ' > /etc/udev/rules.d/70-vdb.rules
+
+for i in node1 node2 node3
+do
+scp /etc/udev/rules.d/70-vdb.rules $i:/etc/udev/rules.d/
+done
+
+for i in node1 node2 node3
+do
+ ceph-deploy disk  zap  $i:vdc   $i:vdd
+done
+
+for i in node1 node2 node3
+do
+ceph-deploy osd create  $i:vdc:/dev/vdb1 $i:vdd:/dev/vdb2
+done
+
+rbd create demo --image-feature  layering --size 10G
+rbd create rbd/image  --image-feature  layering --size 10G
+rbd create rbd/image  --image-feature  layering --size 10G
+~                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+~                                                                  
