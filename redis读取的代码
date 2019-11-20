@@ -1,0 +1,7 @@
+<?php
+$x = new redis();
+$x->connect("192.168.4.50","6350");
+$x->auth("123456");
+echo    $x->get("username");
+?>
+
