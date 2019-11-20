@@ -1,0 +1,23 @@
+#!/bin/bash
+a=$(ifconfig eth0 | awk '/inet /{print $2}')  #查看eth0网卡拥有inet的行的第2列 定义为一个函数
+aa=$(ifconfig eth0 |awk '/TX p/{print $5}') #查看eth0网卡拥有TX p的行的第5列 定义为一个函数
+aaa=$(ifconfig eth0 | awk '/PX p/{print $5}') #查看eth0网卡拥有PX p的行的第5列 定义为一个函数
+df=$( df | awk '/\/$/{print $4,$5}') #查看df中以"/"结尾的第4列和第5列 定义为一个函数
+cpu=$(uptime  | awk '{print $8,$9,$10}')
+free=$(free | awk '/Mem/{print $4}')
+passwd=$(cat  /etc/passwd | wc -l)
+who=$(who | wc -l)
+rp=$(rpm -qa | wc -l)
+ps=$(ps aux | wc -l)
+echo  -e "\033[42m 本机的性能 \033[0m"
+echo "本地IP地址是:"$a
+echo "本机CPU最近15分钟的负载是:"$cpu
+echo "入站网卡流量为:"$aaa
+echo "出站网卡流量为:"$aa
+echo "内存剩余容量为:"$free
+echo "根分区剩余容量为:"$df
+echo "本地账户数量为:"$who
+echo "当前登陆计算机的账户数量为:"$passwd
+echo "当前计算机启动的进程数量为:"$ps
+echo "当前计算机已安装的软件数量为:"$rp
+
