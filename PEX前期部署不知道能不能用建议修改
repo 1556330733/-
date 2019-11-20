@@ -1,0 +1,37 @@
+#!/bin/bash
+ yum -y install httpd
+yum -y install dhcp
+mm=`cat /usr/share/doc/dhcp*/dhcpd.conf.example`
+echo "$mm" >> /etc/dhcp/dhcpd.conf
+sed -i "6,51d" /etc/dhcp/dhcpd.conf
+sed -i "15,63d" /etc/dhcp/dhcpd.conf
+sed -ir "/10.5.5.0/s/.*/subnet 192.168.4.0  netmask  255.255.255.0 {/" /etc/dhcp/dhcpd.conf
+sed -ir "/range/s/.*/range 192.168.4.100  192.168.4.200;/" /etc/dhcp/dhcpd.conf
+sed -ri "/name-servers/s/.*/option domain-name-servers 192.168.4.4;/" /etc/dhcp/dhcpd.conf
+sed -ir "/10.5.5.1/s/.*/  option routers 192.168.4.254;/" /etc/dhcp/dhcpd.conf
+ sed   -ri  "/internal.example.org/d" /etc/dhcp/dhcpd.conf
+sed   -ir  "/broadcast/d" /etc/dhcp/dhcpd.conf
+sed -ir "/max-lease-time/a\\next-server  192.168.4.4;" /etc/dhcp/dhcpd.conf
+sed -ir '/next-server/a\\ filename  "pxelinux.0";' /etc/dhcp/dhcpd.conf
+systemctl restart dhcpd
+yum -y install tftp-server
+systemctl restart tftp
+yum -y install syslinux
+cp /usr/share/syslinux/pxelinux.0  /var/lib/tftpboot/
+echo "/dev/cdrom /mnt/ iso9660   defaults        0 0" >> /etc/fstab
+mount -a
+mkdir /var/www/html/centos
+echo "/dev/cdrom /var/www/html/centos iso9660   defaults        0 0" >> /etc/fstab
+mkdir /var/lib/tftpboot/pxelinux.cfg
+cp /mnt/isolinux/isolinux.cfg   /var/lib/tftpboot/pxelinux.cfg/default
+ cp /mnt/isolinux/vesamenu.c32 /mnt/isolinux/splash.png /mnt/isolinux/vmlinuz /mnt/isolinux/initrd.img /var/lib/tftpboot/
+sed -ir "65,120d"  /var/lib/tftpboot/pxelinux.cfg/default
+yum -y install system-config-kickstart
+sed -ir "/local_repo/s/.*/[development]/" /etc/yum.repos.d/local.repo
+#cp /root/ks.cfg /var/www/html/
+sed -ir "/append/s/.*/append initrd=initrd.img  ks=http:\/\/192.168.4.4\/ks.cfg/"  /var/lib/tftpboot/pxelinux.cfg/default
+~                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+~                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+~                                                                                                                                                   
+
+~                                                                        
