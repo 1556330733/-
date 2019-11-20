@@ -1,0 +1,19 @@
+#!/bin/bash
+tar -zxvf redis-4.0.8.tar.gz
+yum -y install  gcc
+cd /root/redis-4.0.8
+make && make install
+/root/redis-4.0.8/utils/install_server.sh<<EOF
+
+
+
+
+
+
+
+
+
+
+EOF   	#<<EOF	EOF中间输入回车键可以在脚本中输入回车
+
+
