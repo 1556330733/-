@@ -1,0 +1,9 @@
+#!/bin/bash
+yum -y  install ceph-common #装ceph-common的安装包
+scp 192.168.4.11:/etc/ceph/ceph.conf  /etc/ceph/  #用scp把192.168.4.11的机子中的/etc/ceph/ceph.conf 传输到自己的/etc/ceph
+scp 192.168.4.11:/etc/ceph/ceph.client.admin.keyring /etc/ceph/ #用scp把192.168.4.11的机子中的/etc/ceph/ceph.conf 传输到自己的/etc/ceph
+rbd map image #添加叫image的块(存储块)
+mkfs.xfs /dev/rbd0 #把/dev/rbd0以mkfs.xfs的方式格式化
+mount /dev/rbd0 /mnt/ #把/dev/rdb0 以挂载的方式挂载到/mnt下
+echo "test" > /mnt/test.txt #把test重定向到/mnt/test.txt中
+
