@@ -1,0 +1,61 @@
+＃！/bin/bash
+yum -y install  rpm-build
+ rpmbuild -ba nginx.spec 
+cp /root/lnmp_soft/nginx-1.12.2.tar.gz  /root/rpmbuild/SOURCES/
+echo  "
+Name:nginx
+Version:1.12.2
+Release:10
+Summary:Nginx is a web server software
+
+#Group:         
+License:GPL
+URL:www.test.com
+Source0:nginx-1.12.2.tar.gz
+
+#BuildRequires: 
+#Requires:      
+
+%description
+nginx [engine x] is an HTTP and reverse proxy server
+
+%post
+useradd nginx
+
+
+%prep
+%setup -q
+
+
+%build
+./configure
+make %{?_smp_mflags}
+
+
+%install
+make install DESTDIR=%{buildroot}
+
+%files
+%doc
+/usr/local/nginx/*
+
+
+%changelog " > /root/rpmbuild/SPECS/nginx.spec
+yum -y install  gcc  pcre-devel openssl-devel
+
+
+rpmbuild -ba /root/rpmbuild/SPECS/nginx.spec
+
+ rpm -ivh /root/rpmbuild/RPMS/x86_64/nginx-1.12.2-10.x86_64.rpm 
+
+ /usr/local/nginx/sbin/nginx
+
+
+
+
+
+
+
+
+
+
