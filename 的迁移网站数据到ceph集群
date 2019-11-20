@@ -1,0 +1,49 @@
+#!/bin/bash
+#先去ｎｆｓ服务器中将备份数据拷贝给ｗｅｂ１
+#cd /web_share/html/
+#tar -czpf /root/html.tar.gz ./*
+#scp /root/html.tar.gz 192.168.2.11:/usr/local/nginx/html/
+ssh-keygen   -f /root/.ssh/id_rsa    -N ''
+
+for i in 11 12 13
+do
+ssh-copy-id  192.168.2.$i
+done
+for i in 11 12 13
+do
+ssh 192.168.2.$i "/usr/local/nginx/sbin/nginx -s stop"
+done
+for i in 11 12 13
+do
+ssh 192.168.2.$i "umount /usr/local/nginx/html"
+done
+for i in 11 12 13
+do
+ssh 192.168.2.$i "sed -ir "/192.168.2.31/s/^/#/" /etc/fstab"
+done
+#[root@node1 ceph-cluster]# cat /etc/ceph/ceph.client.admin.keyring 
+#[client.admin]
+#	key = AQBzBI9dgEk+EBAApMBZ9gB7Sp0REPktUaA5gQ==        去ｎｏｄｅ１中查看ｃｅｐｈ账户与密码！！！！！！！！！！！！！！！！！！！！！！！！！！！！一定要改！！！
+mount -t ceph 192.168.2.41:6789:/ /usr/local/nginx/html/ -o name=admin,secret=AQBzBI9dgEk+EBAApMBZ9gB7Sp0REPktUaA5gQ==
+echo 'mount -t ceph 192.168.2.41:6789:/ /usr/local/nginx/html/ -o name=AQBzBI9dgEk+EBAApMBZ9gB7Sp0REPktUaA5gQ==' >> /etc/rc.local
+for i in 11 12 13; do scp /etc/rc.local root@192.168.2.$i:/etc/; done
+for i in 11 12 13; do ssh 192.168.2.$i "chmod +x /etc/rc.local"; done
+cd /usr/local/nginx/html/
+tar -xf html.tar.gz
+rm -rf html.tar.gz
+
+for i in 11 12 13
+do
+ssh 192.168.2.$i "/usr/local/nginx/sbin/nginx"
+done
+
+for i in 11 12 13
+do
+ssh 192.168.2.$i "sed -ir "/192.168.2.31/s/#//"/etc/fstab"
+done
+
+for i in 11 12 13
+do
+ssh 192.168.2.$i "mount -a"
+done
+
