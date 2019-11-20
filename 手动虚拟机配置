@@ -1,0 +1,24 @@
+#!/bin/bash
+cd /var/lib/libvirt/images/
+qemu-img create -b .node_base.qcow2  -f qcow2  ${1}.img
+cp .node_base.xml   /etc/libvirt/qemu/${1}.xml  
+sed  -i "2s/node_base/${1}/" /etc/libvirt/qemu/${1}.xml
+sed  -i  "26s/node_base.img/${1}.img/" /etc/libvirt/qemu/${1}.xml
+ virsh define /etc/libvirt/qemu/${1}.xml
+virsh start ${1}
+virsh console ${1}
+
+~                                
+###还需改进
+#优化后
+#!/bin/bash
+while (( $# ));do
+cd /var/lib/libvirt/images/
+qemu-img create -b .node_base.qcow2  -f qcow2  ${1}.img
+sed   "s,node_base,${1}," .node_base.xml > /etc/libvirt/qemu/${1}.xml   #xml文件为虚拟机配置数据
+ virsh define /etc/libvirt/qemu/${1}.xml
+virsh start ${1}
+#virsh console ${1}
+shift
+done
+
