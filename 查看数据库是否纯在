@@ -1,0 +1,11 @@
+#!/bin/bash
+log_file=/var/log/mysql_count.log #把数据库日志定义一个数值
+user=root #定义一个数值
+passwd=123456 #定义应该数值
+while : #一个\死循环
+do
+ sleep 2 #睡2秒
+ count=`mysqladmin -u "$user" -p "$passowrd" status | awk '{print $4}'` #远程一个数据库查看他的状态然后管道awk输出第4列 定义成一个函数
+echo "`date +%Y‐%m‐%d` 并发连接数为:$count" >> $log_file #把年-月-日 并发连接数为:$count追加从定向到数据库日志中
+done
+
